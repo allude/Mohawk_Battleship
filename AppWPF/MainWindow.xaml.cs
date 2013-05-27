@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using MBC.Core;
 using System.ComponentModel;
+using MBC.Controllers;
 
 namespace MBC.App.WPF
 {
@@ -25,11 +26,21 @@ namespace MBC.App.WPF
         ObservableCollection<RoundActivityEntry> roundActLogEntries = new ObservableCollection<RoundActivityEntry>();
         ObservableCollection<RoundEntry> roundLogEntries = new ObservableCollection<RoundEntry>();
         Configuration config;
+        Competition competition;
+        IBattleshipController blueController;
+        IBattleshipController redController;
 
         public MainWindow()
         {
             InitializeComponent();
             config = Configuration.Global;
+
+            blueController = new RandomBot();
+            redController = new RandomBot();
+            IBattleshipController[] controllers = { blueController, redController };
+            competition = new Competition(controllers, config);
+            competition.RoundTurnEndEvent += new Competition.RndTick(UpdateFieldControl);
+
         }
 
         private void AddRoundActivity(RoundLog.RoundActivity action)
@@ -165,7 +176,7 @@ namespace MBC.App.WPF
          */
         private void btnRoundShoot_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            competition.RoundTurn();
         }
 
         /**
@@ -277,6 +288,26 @@ namespace MBC.App.WPF
         private void BtnLoadConfig_Click(object sender, RoutedEventArgs e)
         {
             throw new NotImplementedException();
+        }
+
+        /**
+         * <summary>Call the SetBattlefield method of the FieldControl associated with the competition's current controller.</summary>
+         */
+        private void UpdateFieldControl()
+        {
+            IBattleshipController currentController = competition.Turn.ibc;
+
+            if (currentController == redController)
+            {
+                redField.SetBattlefield(competition.GetBattlefield(), redController);
+            }
+
+            else if (currentController == blueController)
+            {
+                blueField.SetBattlefield(competition.GetBattlefield(), blueController);
+            }
+
+            UpdateLayout();
         }
     }
 }

@@ -32,6 +32,19 @@ namespace MBC.App.WPF
         Dictionary<int, List<Rectangle>> ships;
         List<Ellipse> opponentShots;
 
+
+        public Field Battlefield 
+        { 
+            get { return battlefield; } 
+            set { battlefield = value; }
+        }
+
+        public IBattleshipController Controller
+        {
+            get { return controller; }
+            set { controller = value; } 
+        }
+
         public FieldControl()
         {
             InitializeComponent();

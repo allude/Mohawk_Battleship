@@ -43,6 +43,9 @@
         public delegate void MatchEnd();
         public event MatchEnd MatchEndEvent;
 
+
+        public Controller Turn { get { return turn; } }
+
         /**
          * <summary>Constructs a new BattleshipCompetition object using a BattleshipConfig for configuration.</summary>
          */
