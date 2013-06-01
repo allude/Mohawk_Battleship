@@ -357,5 +357,15 @@
         {
             isRunning = false;
         }
+
+        public Controller GetController(int index)
+        {
+            if (index < controllers.Length - 1)
+            {
+                return controllers[index];
+            }
+
+            return null;
+        }
     }
 }
