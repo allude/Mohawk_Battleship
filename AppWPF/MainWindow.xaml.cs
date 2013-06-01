@@ -37,12 +37,20 @@ namespace MBC.App.WPF
             centerConsoleBorder.Visibility = System.Windows.Visibility.Collapsed;
             advTabs.Visibility = System.Windows.Visibility.Collapsed;
             UpdateLayout();
-            config = Configuration.Global;
+            config = Configuration.Default;
 
             blueController = new RandomBot();
             redController = new RandomBot();
+
             IBattleshipController[] controllers = { blueController, redController };
             competition = new Competition(controllers, config);
+
+            redField.SetController(Controller.Red);
+            redField.SetField(competition.GetBattlefield());
+
+            blueField.SetController(Controller.Blue);
+            blueField.SetField(competition.GetBattlefield());
+
             competition.RoundTurnEndEvent += new Competition.RndTick(UpdateFieldControl);
 
         }
@@ -303,12 +311,12 @@ namespace MBC.App.WPF
 
             if (currentController == redController)
             {
-                redField.SetBattlefield(competition.GetBattlefield(), redController);
+                redField.UpdateFieldDisplay();
             }
 
             else if (currentController == blueController)
             {
-                blueField.SetBattlefield(competition.GetBattlefield(), blueController);
+                blueField.UpdateFieldDisplay();
             }
 
             UpdateLayout();
