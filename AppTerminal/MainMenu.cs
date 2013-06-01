@@ -3,23 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MBC.Core;
+using MBC.App.Terminal.Layouts;
+using MBC.App.Terminal.Controls;
 
 namespace MBC.App.Terminal
 {
+
+    /**
+     * <summary>This MainMenu class is the first object to be displayed on the console when the application
+     * is started.
+     * 
+     * 
+     * </summary>
+     */
     public class MainMenu : TerminalModule
     {
-        Menu menu;
+        VerticalLayout menuLayout;
         public MainMenu()
         {
-            menu = new Menu(this, 6, true, "Start a competition", "Configuration Manager", "Exit");
-            menu.MenuSelectEvent += new Menu.MenuSelect(menu_MenuSelectEvent);
+            menuLayout = new VerticalLayout(VerticalLayout.VerticalAlign.Center);
+            menuLayout.Add(new ButtonControl("Start a competition", MenuSelectEvent));
+            menuLayout.Add(new ButtonControl("Configuration Manager", MenuSelectEvent));
+            menuLayout.Add(new ButtonControl("Exit", MenuSelectEvent));
+            AddControlLayout(menuLayout);
         }
 
-        void menu_MenuSelectEvent(string s)
+        void MenuSelectEvent(string s)
         {
             switch (s)
             {
                 case "Start a competition":
+                    BattleshipConsole.RemoveModule(this);
+                    BattleshipConsole.AddModule(new BotSelector());
+                    BattleshipConsole.UpdateDisplay();
                     break;
                 case "Configuration Manager":
                     break;
@@ -36,8 +52,8 @@ namespace MBC.App.Terminal
             WriteCenteredText("This is the MBC Main Menu.");
             NewLine();
             WriteCenteredText("Use the arrow keys to navigate menus.");
-            NewLine();
-            menu.Display();
+            NewLine(2);
+            menuLayout.Display();
         }
     }
 }

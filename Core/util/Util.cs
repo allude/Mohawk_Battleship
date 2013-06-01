@@ -55,16 +55,24 @@ namespace MBC.Core
             string result = "";
             string[] locParts = Assembly.GetExecutingAssembly().Location.Split('\\');
             for (int i = 0; i < locParts.Length - 1; i++)
-                result += locParts[i]+"\\";
+                result += locParts[i] + "\\";
             return result + "..\\";
         }
 
         /**
-         * <returns>A string that contains the name and version of the specified controller</returns>
+         * <returns>A string that contains the name and version of the specified Controller</returns>
          */
         public static string ControllerToString(IBattleshipController c)
         {
             return c.Name + " (v" + c.Version + ")";
+        }
+
+        /**
+         * <returns>A string that contains the name and version of the specified controller in the given Field object.</returns>
+         */
+        public static string ControllerToString(Field field, int idx)
+        {
+            return field[idx].name + " (v" + field[idx].version + ")";
         }
 
         /**
@@ -99,11 +107,44 @@ namespace MBC.Core
         }
 
         /**
-         * <summary>Uses the global configuration to parse the console color value.</summary>
+         * <summary>Sets the foreground color of the Console to the one specified in the given string.</summary>
+         * <param name="colName">The name of the enum in ConsoleColor, as a string</param>
          */
-        public static T EnumKey<T>(string key)
+        public static void SetConsoleForegroundColor(string colName)
         {
-            return (T)Enum.Parse(typeof(T), Configuration.Global.GetValue<string>(key));
+            Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), colName);
+        }
+
+        /**
+         * <summary>Sets the background color of the Console to the one specified in the given string.</summary>
+         * <param name="colName">The name of the enum in ConsoleColor, as a string</param>
+         */
+        public static void SetConsoleBackgroundColor(string colName)
+        {
+            Console.BackgroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), colName);
+        }
+
+        /**
+         * <summary>Call at the beginning of an application to invoke all the static methods that match
+         * the name "SetConfigDefaults". This will allow classes to set the default configuration values
+         * into the default Configuration object at startup.</summary>
+         */
+        public static void LoadConfigurationDefaults()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly thisAssembly in assemblies)
+            {
+                foreach (Type type in thisAssembly.GetTypes())
+                {
+                    foreach (MethodInfo method in type.GetMethods())
+                    {
+                        if (method.Name == "SetConfigDefaults")
+                        {
+                            method.Invoke(null, null);
+                        }
+                    }
+                }
+            }
         }
     }
 }
