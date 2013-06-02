@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:dm0="http://schemas.microsoft.com/VisualStudio/2008/DslTools/Core" xmlns:dm1="http://schemas.microsoft.com/dsltools/Kernel" xmlns:dm2="http://schemas.microsoft.com/dsltools/Component" xmlns:dm3="http://schemas.microsoft.com/dsltools/UseCase" xmlns:dm4="http://schemas.microsoft.com/dsltools/Activity" xmlns:dm5="http://schemas.microsoft.com/dsltools/Interaction" xmlns:dm6="http://schemas.microsoft.com/dsltools/UmlModelLibrary" xmlns:dm7="http://schemas.microsoft.com/dsltools/UmlDiagrams" xmlns:dm8="http://schemas.microsoft.com/dsltools/LogicalClassDesigner"
+  dslVersion="1.0.0.0"
+  Id="e6daa428-7bbc-40c4-9056-80709a632d7b"
+  name="accolade"
+  visibility="Private" xmlns="http://schemas.microsoft.com/dsltools/ModelStore">
+  <referencesInternal>
+    <reference
+      Id="3a43aa23-fa36-4c66-aaeb-a8c8cccc0886"
+      handle="viewcode://./CodeSchema_Namespace?Namespace%3DMBC.Core.mbc.accolade"
+      tag="ViewCode" />
+  </referencesInternal>
+  <packagedElements>
+    <packageHasNamedElement>
+      <Interface
+        Id="b29cb3c9-6b37-49e9-83ca-821d7d926448"
+        name="AccoladeProcessor"
+        isAbstract="false"
+        isLeaf="false">
+        <referencesInternal>
+          <reference
+            Id="432bec93-419c-4af6-97b3-a0c21f19bd72"
+            handle="viewcode://./CodeSchema_Interface?Assembly%3Dfile:%2F%2F%2FC:%2FUsers%2FBrandon%2FDocuments%2FMohawk_Battleship%2Fbin%2Fmbc_core.dll Namespace%3DMBC.Core.mbc.accolade Type%3DAccoladeProcessor"
+            tag="ViewCode" />
+        </referencesInternal>
+        <appliedStereotypesInternal>
+          <stereotypeInstance
+            Id="d6521b6e-0282-4e3a-a0a9-5de82d017fa0"
+            name="interface"
+            profile="CSharpProfile">
+            <propertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="953ca9b6-2761-41fa-87f1-c7931397b385">
+                <propertyInstance
+                  Id="aee86f4b-b41f-4e53-b006-8c10060d13c2"
+                  name="ClrAttributes" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="6515a7d1-ed6e-4a89-a55a-ff942842e9a2">
+                <propertyInstance
+                  Id="8b89e5e6-ab22-4fca-818e-f3d83589b3ac"
+                  name="IsPartial"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="03550d3c-762a-4059-ba29-cd602b46f5a3">
+                <propertyInstance
+                  Id="cb7a2c76-0425-407b-a90f-315a6ee6b496"
+                  name="IsUnsafe"
+                  value="false" />
+              </stereotypeInstanceHasPropertyInstances>
+              <stereotypeInstanceHasPropertyInstances
+                Id="6c3a7ffe-2a26-4e84-8ed6-bbabb01c65e5">
+                <propertyInstance
+                  Id="7e21ccd3-15a5-43e2-8393-f06988c70faf"
+                  name="PackageVisibility"
+                  value="internal" />
+              </stereotypeInstanceHasPropertyInstances>
+            </propertyInstances>
+          </stereotypeInstance>
+        </appliedStereotypesInternal>
+      </Interface>
+    </packageHasNamedElement>
+  </packagedElements>
+</package>
