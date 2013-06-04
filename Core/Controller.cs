@@ -45,8 +45,8 @@ namespace MBC.Core
 
             fieldIdx = idx;
 
-            info.score = 0;
-            info.shotsMade = new List<Point>();
+            info.Score = 0;
+            info.ShotsMade = new List<Point>();
             stopwatch = new Stopwatch();
         }
 
@@ -81,13 +81,13 @@ namespace MBC.Core
          */
         public bool ShipsReady()
         {
-            foreach (Ship s1 in info.ships)
+            foreach (Ship s1 in info.Ships)
             {
 
-                if (!s1.IsPlaced || !s1.IsValid(field.gameSize))
+                if (!s1.IsPlaced || !s1.IsValid(field.GameSize))
                     return false;
 
-                foreach (Ship s2 in info.ships)
+                foreach (Ship s2 in info.Ships)
                 {
                     if (s2 == s1) continue;
                     if (s2.ConflictsWith(s1)) return false;
@@ -111,7 +111,7 @@ namespace MBC.Core
          */
         public bool RanOutOfTime()
         {
-            if (stopwatch.Elapsed > field.timeoutLimit)
+            if (stopwatch.Elapsed > field.TimeoutLimit)
                 return true;
             return false;
         }
@@ -123,10 +123,10 @@ namespace MBC.Core
         public bool NewGame()
         {
             stopwatch.Reset();
-            info.shotsMade.Clear();
+            info.ShotsMade.Clear();
             stopwatch.Start();
 
-            ibc.NewGame(field.gameSize, field.timeoutLimit, field.fixedRandom);
+            ibc.NewGame(field.GameSize, field.TimeoutLimit, field.FixedRandom);
 
             stopwatch.Stop();
             return RanOutOfTime();
@@ -139,9 +139,9 @@ namespace MBC.Core
          */
         public bool PlaceShips(List<Ship> newShips)
         {
-            info.ships = newShips;
+            info.Ships = newShips;
             stopwatch.Start();
-            ibc.PlaceShips(info.ships.AsReadOnly());
+            ibc.PlaceShips(info.Ships.AsReadOnly());
             stopwatch.Stop();
             return RanOutOfTime();
         }
@@ -151,7 +151,7 @@ namespace MBC.Core
          */
         public Ship GetShipAtPoint(Point p)
         {
-            foreach (Ship s in info.ships)
+            foreach (Ship s in info.Ships)
                 if (s.IsAt(p))
                     return s;
             return null;
@@ -162,7 +162,7 @@ namespace MBC.Core
          */
         public bool IsAlive(List<Point> shots)
         {
-            foreach (Ship s in info.ships)
+            foreach (Ship s in info.Ships)
                 if (!s.IsSunk(shots))
                     return true;
             return false;
@@ -189,10 +189,10 @@ namespace MBC.Core
             if (RanOutOfTime())
                 return new Point(MagicNumberLose, MagicNumberLose);
 
-            if (info.shotsMade.Where(s => s.X == shot.X && s.Y == shot.Y).Any())
+            if (info.ShotsMade.Where(s => s.X == shot.X && s.Y == shot.Y).Any())
                 return ShootAt(opponent);
 
-            info.shotsMade.Add(shot);
+            info.ShotsMade.Add(shot);
             return shot;
         }
 
@@ -242,7 +242,7 @@ namespace MBC.Core
          */
         public void GameWon()
         {
-            info.score++;
+            info.Score++;
             ibc.GameWon();
         }
 

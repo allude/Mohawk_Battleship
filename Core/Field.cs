@@ -17,20 +17,20 @@ namespace MBC.Core
     [Serializable]
     public class Field
     {
-        public Size gameSize;           //The size of the battlefield
-        public Random fixedRandom;      //A Random object
-        public List<int> shipSizes;     //A list of all the ships available on the battlefield
-        public TimeSpan timeoutLimit;   //The time limit for this field
-        private ControllerInfo[] info;  //A 2-element array that contains information for each controller.
+        public Size GameSize;           //The size of the battlefield
+        public Random FixedRandom;      //A Random object
+        public List<int> ShipSizes;     //A list of all the ships available on the battlefield
+        public TimeSpan TimeoutLimit;   //The time limit for this field
+        private ControllerInfo[] controllers;  //A 2-element array that contains information for each controller.
 
         /**
          * <summary>Constructs a Battlefield object initialized with two opponents</summary>
          */
-        public Field(IBattleshipController[] ibc)
+        public Field(IBattleshipController[] battleshipController)
         {
-            info = new ControllerInfo[2];
-            info[0] = new ControllerInfo(ibc[0].Name, ibc[0].Version);
-            info[1] = new ControllerInfo(ibc[1].Name, ibc[1].Version);
+            controllers = new ControllerInfo[2];
+            controllers[0] = new ControllerInfo(battleshipController[0].Name, battleshipController[0].Version);
+            controllers[1] = new ControllerInfo(battleshipController[1].Name, battleshipController[1].Version);
         }
 
         /**
@@ -38,11 +38,11 @@ namespace MBC.Core
          */
         public Field(Field copy)
         {
-            info = (ControllerInfo[])copy.info.Clone();
-            gameSize = copy.gameSize;
-            fixedRandom = copy.fixedRandom;
-            shipSizes = copy.shipSizes;
-            timeoutLimit = copy.timeoutLimit;
+            controllers = (ControllerInfo[])copy.controllers.Clone();
+            GameSize = copy.GameSize;
+            FixedRandom = copy.FixedRandom;
+            ShipSizes = copy.ShipSizes;
+            TimeoutLimit = copy.TimeoutLimit;
         }
 
         /**
@@ -50,15 +50,18 @@ namespace MBC.Core
          */
         public ControllerInfo[] Controllers
         {
-            get { return info; }
+            get { return controllers; }
         }
 
         /**
          * <returns>The ConrollerInfo object at the specified index.</returns>
+         * I recommend removing this. The same data can be accessed through the Controllers property.
+         * It is more difficult to tell what the type of object returned is.
          */
+        [Obsolete]
         public ControllerInfo this[int i]
         {
-            get { return info[i]; }
+            get { return controllers[i]; }
         }
 
         /**
@@ -68,19 +71,19 @@ namespace MBC.Core
         [Serializable]
         public class ControllerInfo
         {
-            public List<Point> shotsMade;
-            public List<Ship> ships;
-            public int score = 0;
+            public List<Point> ShotsMade;
+            public List<Ship> Ships;
+            public int Score = 0;
 
-            public string name;
-            public Version version;
+            public string Name;
+            public Version Version;
 
-            public ControllerInfo(string ctrlName, Version ctrlVersion)
+            public ControllerInfo(string name, Version version)
             {
-                shotsMade = new List<Point>();
-                ships = new List<Ship>();
-                name = ctrlName;
-                version = ctrlVersion;
+                ShotsMade = new List<Point>();
+                Ships = new List<Ship>();
+                Name = name;
+                Version = version;
             }
         }
     }

@@ -70,9 +70,9 @@ namespace MBC.App.Terminal.Modules
                 Field.ControllerInfo redInfo = competition.GetBattlefield()[Controller.Red];
                 Field.ControllerInfo blueInfo = competition.GetBattlefield()[Controller.Blue];
 
-                WriteCenteredText(redInfo.name + " " + redInfo.version + " vs. " + blueInfo.name + " " + blueInfo.version);
+                WriteCenteredText(redInfo.Name + " " + redInfo.Version + " vs. " + blueInfo.Name + " " + blueInfo.Version);
                 NewLine();
-                WriteCenteredText("[" + redInfo.score + "]     score     [" + blueInfo.score + "]");
+                WriteCenteredText("[" + redInfo.Score + "]     score     [" + blueInfo.Score + "]");
                 NewLine();
                 WriteCenteredText(roundsRun + " rounds out of " + totalRounds);
                 NewLine(2);

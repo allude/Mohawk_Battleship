@@ -92,10 +92,10 @@
         {
             config = conf;
             fieldInfo = new Field(ibc);
-            fieldInfo.fixedRandom = new Random(seedNum);
-            fieldInfo.gameSize = new Size(config.GetValue<int>("mbc_field_width"), config.GetValue<int>("mbc_field_height"));
-            fieldInfo.shipSizes = config.GetConfigValueArray<int>("mbc_field_ship_sizes");
-            fieldInfo.timeoutLimit = new TimeSpan(0, 0, 0, 0, config.GetValue<int>("mbc_timeout"));
+            fieldInfo.FixedRandom = new Random(seedNum);
+            fieldInfo.GameSize = new Size(config.GetValue<int>("mbc_field_width"), config.GetValue<int>("mbc_field_height"));
+            fieldInfo.ShipSizes = config.GetConfigValueArray<int>("mbc_field_ship_sizes");
+            fieldInfo.TimeoutLimit = new TimeSpan(0, 0, 0, 0, config.GetValue<int>("mbc_timeout"));
 
             roundList = new List<RoundLog>();
 
@@ -140,7 +140,7 @@
          */
         private List<Ship> GenerateNewShips()
         {
-            return (from s in fieldInfo.shipSizes
+            return (from s in fieldInfo.ShipSizes
                     select new Ship(s)).ToList();
         }
 
@@ -218,7 +218,7 @@
             {
                 roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIDX, RoundLog.RoundAction.ShotAndHit, turn.GetTimeTaken()));
 
-                bool sunk = shipHit.IsSunk(turn.GetFieldInfo().shotsMade);
+                bool sunk = shipHit.IsSunk(turn.GetFieldInfo().ShotsMade);
 
                 turn.ShotHit(shot, sunk);
                 if (sunk)
@@ -231,7 +231,7 @@
             }
 
             //Are there any ships left from the other opponent?
-            if (!Opponent(turn).IsAlive(turn.GetFieldInfo().shotsMade))
+            if (!Opponent(turn).IsAlive(turn.GetFieldInfo().ShotsMade))
                 return GameResultPush(turn, Opponent(turn), null);
             return false;
         }
@@ -251,7 +251,7 @@
                 roundLogger = new RoundLog();
                 roundList.Add(roundLogger);
 
-                turn = controllers[fieldInfo.fixedRandom.Next(2)];
+                turn = controllers[fieldInfo.FixedRandom.Next(2)];
                 roundLogger.PutAction(new RoundLog.RoundActivity(null, turn.FieldIDX, RoundLog.RoundAction.RoundBegin));
             }
 
@@ -287,7 +287,7 @@
          */
         private bool RoundsReached(int rnds)
         {
-            return controllers[0].GetFieldInfo().score >= rnds || controllers[1].GetFieldInfo().score >= rnds;
+            return controllers[0].GetFieldInfo().Score >= rnds || controllers[1].GetFieldInfo().Score >= rnds;
         }
 
         /**
@@ -295,7 +295,7 @@
          */
         public Dictionary<IBattleshipController, int> GetScores()
         {
-            return controllers.ToDictionary(s => s.ibc, s => s.GetFieldInfo().score);
+            return controllers.ToDictionary(s => s.ibc, s => s.GetFieldInfo().Score);
         }
 
         /**

@@ -40,13 +40,13 @@ namespace MBC.App.Terminal.Modules
 
             Field.ControllerInfo redInfo = competition.GetBattlefield()[Controller.Red];
             Field.ControllerInfo blueInfo = competition.GetBattlefield()[Controller.Blue];
-            if (redInfo.score > blueInfo.score)
+            if (redInfo.Score > blueInfo.Score)
             {
-                WriteCenteredText(redInfo.name + " won!");
+                WriteCenteredText(redInfo.Name + " won!");
             }
-            else if (blueInfo.score > redInfo.score)
+            else if (blueInfo.Score > redInfo.Score)
             {
-                WriteCenteredText(blueInfo.name + " won!");
+                WriteCenteredText(blueInfo.Name + " won!");
             }
             else
             {
