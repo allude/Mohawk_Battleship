@@ -7,83 +7,114 @@ using System.Drawing;
 namespace MBC.Core
 {
 
-    /**
-     * <summary>The Field class represents a battleship field. It contains battleship field information and
-     * two ControllerInfo objects that contain information on the two controllers in the Field.
-     * 
-     * Accessing the individual ControllerInfo objects is made simple by using a value of 0 or 1. The order
-     * of the ControllerInfo objects does not change, so constants can be used to access them.</summary>
-     */
+    
+    /// <summary>The Field class represents a battleship field. It contains battleship field information and
+    /// two ControllerInfo objects that contain information on the two controllers in the Field.
+    /// 
+    /// Accessing the individual ControllerInfo objects is made simple by using a value of 0 or 1. The order
+    /// of the ControllerInfo objects does not change, so constants can be used to access them.</summary>
     [Serializable]
     public class Field
     {
-        public Size GameSize;           //The size of the battlefield
-        public Random FixedRandom;      //A Random object
-        public List<int> ShipSizes;     //A list of all the ships available on the battlefield
-        public TimeSpan TimeoutLimit;   //The time limit for this field
-        private ControllerInfo[] controllers;  //A 2-element array that contains information for each controller.
+        /// <summary>
+        /// The size of the battlefield
+        /// </summary>
+        public Size gameSize;
 
-        /**
-         * <summary>Constructs a Battlefield object initialized with two opponents</summary>
-         */
-        public Field(IBattleshipController[] battleshipController)
+        /// <summary>
+        /// A Random object
+        /// </summary>
+        public Random fixedRandom;
+
+        /// <summary>
+        /// A list of all the ships available on the battlefield
+        /// </summary>
+        public List<int> shipSizes;
+
+        /// <summary>
+        /// The time limit for this field
+        /// </summary>
+        public TimeSpan timeoutLimit;
+        private ControllerInfo[] info;  //A 2-element array that contains information for each controller.
+
+        
+        /// <summary>Constructs a Battlefield object initialized with two opponents</summary>
+        public Field(IBattleshipController[] ibc)
         {
-            controllers = new ControllerInfo[2];
-            controllers[0] = new ControllerInfo(battleshipController[0].Name, battleshipController[0].Version);
-            controllers[1] = new ControllerInfo(battleshipController[1].Name, battleshipController[1].Version);
+            info = new ControllerInfo[2];
+            info[0] = new ControllerInfo(ibc[0].Name, ibc[0].Version);
+            info[1] = new ControllerInfo(ibc[1].Name, ibc[1].Version);
         }
 
-        /**
-         * <summary>Copy constructor</summary>
-         */
+        
+        /// <summary>Copy constructor</summary>
         public Field(Field copy)
         {
-            controllers = (ControllerInfo[])copy.controllers.Clone();
-            GameSize = copy.GameSize;
-            FixedRandom = copy.FixedRandom;
-            ShipSizes = copy.ShipSizes;
-            TimeoutLimit = copy.TimeoutLimit;
+            info = (ControllerInfo[])copy.info.Clone();
+            gameSize = copy.gameSize;
+            fixedRandom = copy.fixedRandom;
+            shipSizes = copy.shipSizes;
+            timeoutLimit = copy.timeoutLimit;
         }
 
-        /**
-         * <summary>Gets the controllers in this field.</summary>
-         */
+        
+        /// <summary>Gets the controllers in this field.</summary>
         public ControllerInfo[] Controllers
         {
-            get { return controllers; }
+            get { return info; }
         }
 
-        /**
-         * <returns>The ConrollerInfo object at the specified index.</returns>
-         * I recommend removing this. The same data can be accessed through the Controllers property.
-         * It is more difficult to tell what the type of object returned is.
-         */
-        [Obsolete]
+        
+        /// <summary>It is possible to treat this Field object as a sort of array, by providing the
+        /// index value in square-brackets on the object itself.</summary>
+        /// <returns>The ConrollerInfo object at the specified index.</returns>
         public ControllerInfo this[int i]
         {
-            get { return controllers[i]; }
+            get { return info[i]; }
         }
 
-        /**
-         * <summary>Contains information related to the state of the battlefield for
-         * each opponent.</summary>
-         */
+        
+        /// <summary>Contains information related to the state of the battlefield for
+        /// each controller.</summary>
         [Serializable]
         public class ControllerInfo
         {
-            public List<Point> ShotsMade;
-            public List<Ship> Ships;
-            public int Score = 0;
+            /// <summary>
+            /// The shots made by this controller.
+            /// </summary>
+            public List<Point> shotsMade;
 
-            public string Name;
-            public Version Version;
+            /// <summary>
+            /// The ship placement of this controller.
+            /// </summary>
+            public List<Ship> ships;
 
-            public ControllerInfo(string name, Version version)
+            /// <summary>
+            /// The score for this controller.
+            /// </summary>
+            public int score = 0;
+
+            /// <summary>
+            /// The name of this controller.
+            /// </summary>
+            public string name;
+
+            /// <summary>
+            /// The version of this controller.
+            /// </summary>
+            public Version version;
+
+            /// <summary>
+            /// Contructs a new ControllerInfo that contains information about a controller.
+            /// </summary>
+            /// <param name="ctrlName">The name of the controller.</param>
+            /// <param name="ctrlVersion">The version of the controller.</param>
+            public ControllerInfo(string ctrlName, Version ctrlVersion)
             {
-                ShotsMade = new List<Point>();
-                Ships = new List<Ship>();
-                Name = name;
-                Version = version;
+                shotsMade = new List<Point>();
+                ships = new List<Ship>();
+                name = ctrlName;
+                version = ctrlVersion;
             }
         }
     }
