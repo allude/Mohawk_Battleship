@@ -42,50 +42,54 @@ namespace MBC.Core
         /// <summary>
         /// The class implementing the IBattleshipOpponent interface playing the game.
         /// </summary>
-        public IBattleshipController ibc;
-        private int fieldIdx;
+        public IBattleshipController BattleshipController;
+        private int fieldIndex;
         private Stopwatch stopwatch; //Used to time each call to the iOpponent
         private Field field;
-        private Field.ControllerInfo info;
+        private Field.ControllerInfo controllerInformation;
 
         
         /// <summary>Sets up this Controller</summary>
-        /// <param name="ic">The object that implements the IBattleshipController interface to play the game.</param>
+        /// <param name="battleshipController">The object that implements the IBattleshipController interface to play the game.</param>
         /// <param name="f">The Field object this Controller will make changes to.</param>
-        /// <param name="idx">The index number in the ControllerInfo array in the Field that this Controller represents.</param>
+        /// <param name="index">The index number in the ControllerInfo array in the Field that this Controller represents.</param>
         /// <seealso cref="Field"/>
-        public Controller(IBattleshipController ic, Field f, int idx)
+        public Controller(IBattleshipController battleshipController, Field f, int index)
         {
-            ibc = ic;
+            BattleshipController = battleshipController;
             field = f;
 
-            info = f[idx];
+            controllerInformation = f.Controllers[index];
 
-            fieldIdx = idx;
+            fieldIndex = index;
 
-            info.Score = 0;
-            info.ShotsMade = new List<Point>();
+            controllerInformation.Score = 0;
+            controllerInformation.ShotsMade = new List<Point>();
             stopwatch = new Stopwatch();
         }
 
         
         /// <summary>Gets the ControllerInfo index this object represents in the Field.</summary>
         /// <seealso cref="Field"/>
-        public int FieldIDX
+        public int FieldIndex
         {
-            get { return fieldIdx; }
+            get { return fieldIndex; }
         }
 
         
         /// <returns>The information related to this controller on the battlefield</returns>
         /// <seealso cref="Field.ControllerInfo"/>
+        public Field.ControllerInfo ControllerInformation { get { return controllerInformation; } }
+        [Obsolete]
         public Field.ControllerInfo GetFieldInfo()
         {
-            return info;
+            return controllerInformation;
         }
 
         
         /// <returns>The time the last action took for this controller to perform.</returns>
+        public long TimeTaken { get { return stopwatch.ElapsedMilliseconds; } }
+        [Obsolete]
         public long GetTimeTaken()
         {
             return stopwatch.ElapsedMilliseconds;
@@ -97,13 +101,13 @@ namespace MBC.Core
         /// False if otherwise</returns>
         public bool ShipsReady()
         {
-            foreach (Ship s1 in info.Ships)
+            foreach (Ship s1 in controllerInformation.Ships)
             {
 
                 if (!s1.IsPlaced || !s1.IsValid(field.GameSize))
                     return false;
 
-                foreach (Ship s2 in info.Ships)
+                foreach (Ship s2 in controllerInformation.Ships)
                 {
                     if (s2 == s1) continue;
                     if (s2.ConflictsWith(s1)) return false;
@@ -117,7 +121,7 @@ namespace MBC.Core
         /// <param name="opponent">The name of the controller as a string</param>
         public void NewMatch(string opponent)
         {
-            ibc.NewMatch(opponent);
+            BattleshipController.NewMatch(opponent);
         }
 
         
@@ -136,10 +140,10 @@ namespace MBC.Core
         public bool NewGame()
         {
             stopwatch.Reset();
-            info.ShotsMade.Clear();
+            controllerInformation.ShotsMade.Clear();
             stopwatch.Start();
 
-            ibc.NewGame(field.GameSize, field.TimeoutLimit, field.FixedRandom);
+            BattleshipController.NewGame(field.GameSize, field.TimeoutLimit, field.FixedRandom);
 
             stopwatch.Stop();
             return RanOutOfTime();
@@ -151,19 +155,19 @@ namespace MBC.Core
         /// <returns>True if the controller ran out of time. False if they didn't</returns>
         public bool PlaceShips(List<Ship> newShips)
         {
-            info.Ships = newShips;
+            controllerInformation.Ships = newShips;
             stopwatch.Start();
-            ibc.PlaceShips(info.Ships.AsReadOnly());
+            BattleshipController.PlaceShips(controllerInformation.Ships.AsReadOnly());
             stopwatch.Stop();
             return RanOutOfTime();
         }
 
         
-        /// <returns>The ship at point p. Null if there is no ship.</returns>
-        public Ship GetShipAtPoint(Point p)
+        /// <returns>The ship at the passed in point. Null if there is no ship.</returns>
+        public Ship GetShipAtPoint(Point point)
         {
-            foreach (Ship s in info.Ships)
-                if (s.IsAt(p))
+            foreach (Ship s in controllerInformation.Ships)
+                if (s.IsAt(point))
                     return s;
             return null;
         }
@@ -172,7 +176,7 @@ namespace MBC.Core
         /// <returns>True if the controller is still in the match, false if the controller has lost</returns>
         public bool IsAlive(List<Point> shots)
         {
-            foreach (Ship s in info.Ships)
+            foreach (Ship s in controllerInformation.Ships)
                 if (!s.IsSunk(shots))
                     return true;
             return false;
@@ -187,7 +191,7 @@ namespace MBC.Core
         public Point ShootAt(Controller opponent)
         {
             stopwatch.Start();
-            Point shot = ibc.GetShot();
+            Point shot = BattleshipController.GetShot();
             stopwatch.Stop();
 
             if (shot.X < 0)
@@ -198,10 +202,10 @@ namespace MBC.Core
             if (RanOutOfTime())
                 return new Point(MagicNumberLose, MagicNumberLose);
 
-            if (info.ShotsMade.Where(s => s.X == shot.X && s.Y == shot.Y).Any())
+            if (controllerInformation.ShotsMade.Where(s => s.X == shot.X && s.Y == shot.Y).Any())
                 return ShootAt(opponent);
 
-            info.ShotsMade.Add(shot);
+            controllerInformation.ShotsMade.Add(shot);
             return shot;
         }
 
@@ -212,7 +216,7 @@ namespace MBC.Core
         public bool OpponentShot(Point shot)
         {
             stopwatch.Start();
-            ibc.OpponentShot(shot);
+            BattleshipController.OpponentShot(shot);
             stopwatch.Stop();
             return RanOutOfTime();
         }
@@ -224,7 +228,7 @@ namespace MBC.Core
         public bool ShotHit(Point shot, bool sunk)
         {
             stopwatch.Start();
-            ibc.ShotHit(shot, sunk);
+            BattleshipController.ShotHit(shot, sunk);
             stopwatch.Stop();
             return RanOutOfTime();
         }
@@ -235,7 +239,7 @@ namespace MBC.Core
         public bool ShotMiss(Point shot)
         {
             stopwatch.Start();
-            ibc.ShotMiss(shot);
+            BattleshipController.ShotMiss(shot);
             stopwatch.Stop();
             return RanOutOfTime();
         }
@@ -243,28 +247,28 @@ namespace MBC.Core
         /// <summary>Notifys the controller that a game has been won, and increments this controller's score.</summary>
         public void GameWon()
         {
-            info.Score++;
-            ibc.GameWon();
+            controllerInformation.Score++;
+            BattleshipController.GameWon();
         }
 
         /// <summary>Notifys the controller that a game has been lost</summary>
         public void GameLost()
         {
-            ibc.GameLost();
+            BattleshipController.GameLost();
         }
 
         
         /// <summary>Notifys the controller that a matchup is over</summary>
         public void MatchOver()
         {
-            ibc.MatchOver();
+            BattleshipController.MatchOver();
         }
 
         
         /// <summary>Generates a string containing the name and version of the encapsulated IBattleshipController</summary>
         public override string ToString()
         {
-            return Utility.ControllerToString(ibc);
+            return Utility.ControllerToString(BattleshipController);
         }
 
     }

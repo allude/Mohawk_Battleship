@@ -19,58 +19,62 @@ namespace MBC.Core
         /// <summary>
         /// The size of the battlefield
         /// </summary>
-        public Size gameSize;
+        public Size GameSize;
 
         /// <summary>
         /// A Random object
         /// </summary>
-        public Random fixedRandom;
+        public Random FixedRandom;
 
         /// <summary>
         /// A list of all the ships available on the battlefield
         /// </summary>
-        public List<int> shipSizes;
+        public List<int> ShipSizes;
 
         /// <summary>
         /// The time limit for this field
         /// </summary>
-        public TimeSpan timeoutLimit;
-        private ControllerInfo[] info;  //A 2-element array that contains information for each controller.
+        public TimeSpan TimeoutLimit;
+        private ControllerInfo[] controllerInfos;  //A 2-element array that contains information for each controller.
 
         
         /// <summary>Constructs a Battlefield object initialized with two opponents</summary>
-        public Field(IBattleshipController[] ibc)
+        public Field(IBattleshipController[] battleshipControllers)
         {
-            info = new ControllerInfo[2];
-            info[0] = new ControllerInfo(ibc[0].Name, ibc[0].Version);
-            info[1] = new ControllerInfo(ibc[1].Name, ibc[1].Version);
+            controllerInfos = new ControllerInfo[2];
+            controllerInfos[0] = new ControllerInfo(battleshipControllers[0].Name, battleshipControllers[0].Version);
+            controllerInfos[1] = new ControllerInfo(battleshipControllers[1].Name, battleshipControllers[1].Version);
         }
 
         
         /// <summary>Copy constructor</summary>
         public Field(Field copy)
         {
-            info = (ControllerInfo[])copy.info.Clone();
-            gameSize = copy.gameSize;
-            fixedRandom = copy.fixedRandom;
-            shipSizes = copy.shipSizes;
-            timeoutLimit = copy.timeoutLimit;
+            controllerInfos = (ControllerInfo[])copy.controllerInfos.Clone();
+            GameSize = copy.GameSize;
+            FixedRandom = copy.FixedRandom;
+            ShipSizes = copy.ShipSizes;
+            TimeoutLimit = copy.TimeoutLimit;
         }
 
         
         /// <summary>Gets the controllers in this field.</summary>
         public ControllerInfo[] Controllers
         {
-            get { return info; }
+            get { return controllerInfos; }
         }
 
         
         /// <summary>It is possible to treat this Field object as a sort of array, by providing the
         /// index value in square-brackets on the object itself.</summary>
         /// <returns>The ConrollerInfo object at the specified index.</returns>
+        /// I recommend removing this method of accessing ControllInfo.
+        /// This is confusing because I don't know the type of oject that is being returned when using this.
+        /// Also we get the same information from the Controllers property.
+        [Obsolete]
         public ControllerInfo this[int i]
         {
-            get { return info[i]; }
+            get { return controllerInfos[i]; }
         }
 
         
@@ -82,39 +86,39 @@ namespace MBC.Core
             /// <summary>
             /// The shots made by this controller.
             /// </summary>
-            public List<Point> shotsMade;
+            public List<Point> ShotsMade;
 
             /// <summary>
             /// The ship placement of this controller.
             /// </summary>
-            public List<Ship> ships;
+            public List<Ship> Ships;
 
             /// <summary>
             /// The score for this controller.
             /// </summary>
-            public int score = 0;
+            public int Score = 0;
 
             /// <summary>
             /// The name of this controller.
             /// </summary>
-            public string name;
+            public string Name;
 
             /// <summary>
             /// The version of this controller.
             /// </summary>
-            public Version version;
+            public Version Version;
 
             /// <summary>
             /// Contructs a new ControllerInfo that contains information about a controller.
             /// </summary>
-            /// <param name="ctrlName">The name of the controller.</param>
-            /// <param name="ctrlVersion">The version of the controller.</param>
-            public ControllerInfo(string ctrlName, Version ctrlVersion)
+            /// <param name="name">The name of the controller.</param>
+            /// <param name="version">The version of the controller.</param>
+            public ControllerInfo(string name, Version version)
             {
-                shotsMade = new List<Point>();
-                ships = new List<Ship>();
-                name = ctrlName;
-                version = ctrlVersion;
+                ShotsMade = new List<Point>();
+                Ships = new List<Ship>();
+                Name = name;
+                Version = version;
             }
         }
     }

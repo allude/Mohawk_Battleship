@@ -125,7 +125,7 @@ namespace MBC.App.WPF
         private void CreateShips()
         {
             ships.Clear();
-            foreach (int size in battlefield.shipSizes)
+            foreach (int size in battlefield.ShipSizes)
             {
                 //All ships are oriented vertically, so rotate them when needed.
                 var r = new Rectangle
@@ -155,7 +155,7 @@ namespace MBC.App.WPF
         private void LayShips()
         {
             var used = new List<Rectangle>();
-            foreach (Ship ship in battlefield[controller].ships)
+            foreach (Ship ship in battlefield[controller].Ships)
             {
                 foreach (Rectangle rect in ships[ship.Length])
                 {
@@ -166,7 +166,7 @@ namespace MBC.App.WPF
 
                     rect.LayoutTransform = new RotateTransform(ship.Orientation == ShipOrientation.Horizontal ? 90 : 180, rect.Width / 2, 0);
 
-                    Grid.SetRow(rect, battlefield.gameSize.Height - ship.Location.Y - ship.Length);
+                    Grid.SetRow(rect, battlefield.GameSize.Height - ship.Location.Y - ship.Length);
                     Grid.SetColumn(rect, ship.Location.X);
                     Grid.SetZIndex(rect, 100);
                     if (ship.Orientation == ShipOrientation.Horizontal)
@@ -194,7 +194,7 @@ namespace MBC.App.WPF
                 fieldGrid.Children.Remove(e);
             }
             opponentShots.Clear();
-            foreach (System.Drawing.Point p in battlefield[1 - controller].shotsMade)
+            foreach (System.Drawing.Point p in battlefield[1 - controller].ShotsMade)
             {
                 var circle = new Ellipse
                 {
@@ -206,7 +206,7 @@ namespace MBC.App.WPF
                     VerticalAlignment = System.Windows.VerticalAlignment.Center,
                     HorizontalAlignment = System.Windows.HorizontalAlignment.Center
                 };
-                Grid.SetRow(circle, battlefield.gameSize.Height - p.Y);
+                Grid.SetRow(circle, battlefield.GameSize.Height - p.Y);
                 Grid.SetColumn(circle, p.X);
                 Grid.SetZIndex(circle, 99999);
 
@@ -244,7 +244,7 @@ namespace MBC.App.WPF
         {
             battlefield = field;
             fieldLabel.Content = Utility.ControllerToString(field, controller);
-            MakeGrid(field.gameSize.Width, field.gameSize.Height);
+            MakeGrid(field.GameSize.Width, field.GameSize.Height);
             CreateShips();
             LayShips();
             LayShots();

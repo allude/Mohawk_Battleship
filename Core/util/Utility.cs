@@ -77,7 +77,7 @@ namespace MBC.Core
         /// <seealso cref="Field"/>
         public static string ControllerToString(Field field, int idx)
         {
-            return field[idx].name + " (v" + field[idx].version + ")";
+            return field[idx].Name + " (v" + field[idx].Version + ")";
         }
 
         

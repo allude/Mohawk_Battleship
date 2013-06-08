@@ -57,7 +57,7 @@
         private List<RoundLog> roundList;
         private RoundLog roundLogger;               //The current RoundLog for the current round
 
-        private Thread compThread;                  //The thread used for tasking this competition 
+        private Thread competitionThread;                  //The thread used for tasking this competition 
         private bool isRunning = false;             //Should be false whenever rounds should stop running.
 
         private Controller turn;            //The current opponent's turn
@@ -65,22 +65,22 @@
         /// <summary>
         /// Notification of a controller ending their turn.
         /// </summary>
-        public delegate void RndTick();
+        public delegate void RoundTick();
 
         /// <summary>
         /// Fires when a controller has ended their turn.
         /// </summary>
-        public event RndTick RoundTurnEndEvent;
+        public event RoundTick RoundTurnEndEvent;
 
         /// <summary>
-        /// Notification of a round in the competition ending.
+        /// Notification of a round in the competition  ending.
         /// </summary>
-        public delegate void RndEnd();
+        public delegate void RoundEnd();
 
         /// <summary>
         /// Fires when a round has finished.
         /// </summary>
-        public event RndEnd RoundEndEvent;
+        public event RoundEnd RoundEndEvent;
 
         /// <summary>
         /// Notification of the end of a matchup in the competition.
@@ -96,10 +96,10 @@
         /// <summary>Constructs a new Competition object. A Configuration object is to be provided
         /// to set the behaviour of this Competition.</summary>
         /// <param name="config">The Configuration to utilize. See SetConfigDefaults()</param>
-        /// <param name="ibc">The controllers to create a matchup with.</param>
-        public Competition(IBattleshipController[] ibc, Configuration config)
+        /// <param name="battleshipController">The controllers to create a matchup with.</param>
+        public Competition(IBattleshipController[] battleshipController, Configuration config)
         {
-            init(ibc, config, config.GetValue<int>("mbc_random_seed"));
+            init(battleshipController, config, config.GetValue<int>("mbc_random_seed"));
         }
 
         
@@ -107,32 +107,32 @@
         /// to set the behaviour of this Competition, and a random seed number must be provided to
         /// set the internal random number generator.</summary>
         /// <param name="config">The Configuration to utilize. See SetConfigDefaults()</param>
-        /// <param name="ibc">The controllers to create a matchup with.</param>
-        /// <param name="seedNum">The random seed number to create a desired outcome.</param>
-        public Competition(IBattleshipController[] ibc, Configuration config, int seedNum)
+        /// <param name="battleshipController">The controllers to create a matchup with.</param>
+        /// <param name="seedNumber">The random seed number to create a desired outcome.</param>
+        public Competition(IBattleshipController[] battleshipController, Configuration config, int seedNumber)
         {
-            init(ibc, config, seedNum); 
+            init(battleshipController, config, seedNumber); 
         }
 
         
         /// <summary>Called only by the constructor, does initialization of this class. See the constructors
         /// Competition().</summary>
-        private void init(IBattleshipController[] ibc, Configuration conf, int seedNum)
+        private void init(IBattleshipController[] battleshipController, Configuration conf, int seedNumber)
         {
             config = conf;
-            fieldInfo = new Field(ibc);
-            fieldInfo.fixedRandom = new Random(seedNum);
-            fieldInfo.gameSize = new Size(config.GetValue<int>("mbc_field_width"), config.GetValue<int>("mbc_field_height"));
-            fieldInfo.shipSizes = config.GetList<int>("mbc_field_ship_sizes");
-            fieldInfo.timeoutLimit = new TimeSpan(0, 0, 0, 0, config.GetValue<int>("mbc_timeout"));
+            fieldInfo = new Field(battleshipController);
+            fieldInfo.FixedRandom = new Random(seedNumber);
+            fieldInfo.GameSize = new Size(config.GetValue<int>("mbc_field_width"), config.GetValue<int>("mbc_field_height"));
+            fieldInfo.ShipSizes = config.GetList<int>("mbc_field_ship_sizes");
+            fieldInfo.TimeoutLimit = new TimeSpan(0, 0, 0, 0, config.GetValue<int>("mbc_timeout"));
 
             roundList = new List<RoundLog>();
 
             controllers = new Controller[2];
-            controllers[0] = new Controller(ibc[0], fieldInfo, 0);
-            controllers[1] = new Controller(ibc[1], fieldInfo, 1);
+            controllers[0] = new Controller(battleshipController[0], fieldInfo, 0);
+            controllers[1] = new Controller(battleshipController[1], fieldInfo, 1);
 
-            compThread = new Thread(RunCompetition);
+            competitionThread = new Thread(RunCompetition);
         }
 
         
@@ -153,14 +153,14 @@
         }
 
         /// <summary>Gets a RoundLog object associated with a specific round number.</summary>
-        /// <param name="idx">The round number (starting at 0).</param>
+        /// <param name="index">The round number (starting at 0).</param>
         /// <returns>A RoundLog object</returns>
-        public RoundLog GetRoundLogAt(int idx)
+        public RoundLog GetRoundLogAt(int index)
         {
             lock(roundList) {
-                if (idx < 0 || idx > roundList.Count)
+                if (index < 0 || index > roundList.Count)
                     return null;
-                return roundList.ElementAt(idx);
+                return roundList.ElementAt(index);
             }
         }
 
@@ -168,7 +168,7 @@
         /// <returns>A list of ships not placed on the board, defined to having a length specified by shipSizes</returns>
         private List<Ship> GenerateNewShips()
         {
-            return (from s in fieldInfo.shipSizes
+            return (from s in fieldInfo.ShipSizes
                     select new Ship(s)).ToList();
         }
 
@@ -179,19 +179,19 @@
         {
             winner.GameWon();
             loser.GameLost();
-            roundLogger.PutAction(new RoundLog.RoundActivity(null, winner.FieldIDX, RoundLog.RoundAction.Won));
-            roundLogger.PutAction(new RoundLog.RoundActivity(null, loser.FieldIDX, RoundLog.RoundAction.Lost));
+            roundLogger.PutAction(new RoundLog.RoundActivity(null, winner.FieldIndex, RoundLog.RoundAction.Won));
+            roundLogger.PutAction(new RoundLog.RoundActivity(null, loser.FieldIndex, RoundLog.RoundAction.Lost));
             roundLogger.PutAction(new RoundLog.RoundActivity(reason, -1, RoundLog.RoundAction.RoundEnd));
             return true;
         }
 
         
         /// <returns>The opposing BattleshipOpponent relative to 'ibc'</returns>
-        private Controller Opponent(Controller ibc)
+        private Controller Opponent(Controller controller)
         {
-            foreach (Controller bc in controllers)
-                if (ibc != bc)
-                    return bc;
+            foreach (Controller c in controllers)
+                if (controller != c)
+                    return c;
             return null;
         }
 
@@ -200,9 +200,9 @@
         /// <returns>True if the game is over, false if the game is still on-going.</returns>
         private bool NewGame()
         {
-            foreach (Controller bc in controllers)
-                if (bc.NewGame())
-                    return GameResultPush(Opponent(bc), bc, RoundLog.RoundActivity.Reason_Timeout);
+            foreach (Controller controller in controllers)
+                if (controller.NewGame())
+                    return GameResultPush(Opponent(controller), controller, RoundLog.RoundActivity.Reason_Timeout);
             return false;
         }
 
@@ -211,15 +211,15 @@
         /// <returns>True if the game is over. False if the game is on-going</returns>
         private bool ShipPlacement()
         {
-            foreach (Controller bc in controllers)
+            foreach (Controller controller in controllers)
                 do
                 {
-                    if (bc.PlaceShips(GenerateNewShips()))
-                        return GameResultPush(Opponent(bc), bc, RoundLog.RoundActivity.Reason_Timeout);
-                    RoundLog.RoundActivity action = new RoundLog.RoundActivity(bc.ShipsReady() ? "Ready" : "Invalid", bc.FieldIDX, RoundLog.RoundAction.ShipsPlaced);
+                    if (controller.PlaceShips(GenerateNewShips()))
+                        return GameResultPush(Opponent(controller), controller, RoundLog.RoundActivity.Reason_Timeout);
+                    RoundLog.RoundActivity action = new RoundLog.RoundActivity(controller.ShipsReady() ? "Ready" : "Invalid", controller.FieldIndex, RoundLog.RoundAction.ShipsPlaced);
                     action.fieldState = new Field(fieldInfo);
                     roundLogger.PutAction(action);
-                } while (!bc.ShipsReady());
+                } while (!controller.ShipsReady());
             return false;
         }
 
@@ -239,22 +239,22 @@
 
             if (shipHit != null)
             {
-                roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIDX, RoundLog.RoundAction.ShotAndHit, turn.GetTimeTaken()));
+                roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIndex, RoundLog.RoundAction.ShotAndHit, turn.GetTimeTaken()));
 
-                bool sunk = shipHit.IsSunk(turn.GetFieldInfo().shotsMade);
+                bool sunk = shipHit.IsSunk(turn.GetFieldInfo().ShotsMade);
 
                 turn.ShotHit(shot, sunk);
                 if (sunk)
-                    roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIDX, RoundLog.RoundAction.ShipDestroyed, turn.GetTimeTaken()));
+                    roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIndex, RoundLog.RoundAction.ShipDestroyed, turn.GetTimeTaken()));
             }
             else
             {
-                roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIDX, RoundLog.RoundAction.ShotAndMiss, turn.GetTimeTaken()));
+                roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIndex, RoundLog.RoundAction.ShotAndMiss, turn.GetTimeTaken()));
                 turn.ShotMiss(shot);
             }
 
             //Are there any ships left from the other opponent?
-            if (!Opponent(turn).IsAlive(turn.GetFieldInfo().shotsMade))
+            if (!Opponent(turn).IsAlive(turn.GetFieldInfo().ShotsMade))
                 return GameResultPush(turn, Opponent(turn), null);
             return false;
         }
@@ -275,8 +275,8 @@
                 roundLogger = new RoundLog();
                 roundList.Add(roundLogger);
 
-                turn = controllers[fieldInfo.fixedRandom.Next(2)];
-                roundLogger.PutAction(new RoundLog.RoundActivity(null, turn.FieldIDX, RoundLog.RoundAction.RoundBegin));
+                turn = controllers[fieldInfo.FixedRandom.Next(2)];
+                roundLogger.PutAction(new RoundLog.RoundActivity(null, turn.FieldIndex, RoundLog.RoundAction.RoundBegin));
             }
 
             return NewGame() || ShipPlacement();
@@ -289,13 +289,13 @@
         /// <seealso cref="NewRound()"/>
         public bool RoundTurn()
         {
-            bool res = GamePlay();
+            bool result = GamePlay();
             turn = Opponent(turn);
 
             if (RoundTurnEndEvent != null)
                 RoundTurnEndEvent();
 
-            return res;
+            return result;
         }
 
         
@@ -310,9 +310,9 @@
         
         /// <summary>Determines if the number of rounds specified has been reached</summary>
         /// <returns>True if an opponent has reached the number of rounds</returns>
-        private bool RoundsReached(int rnds)
+        private bool RoundsReached(int rounds)
         {
-            return controllers[0].GetFieldInfo().score >= rnds || controllers[1].GetFieldInfo().score >= rnds;
+            return controllers[0].GetFieldInfo().Score >= rounds || controllers[1].GetFieldInfo().Score >= rounds;
         }
 
         
@@ -320,7 +320,7 @@
         /// <returns>A dictionary linking the scores to the opponents.</returns>
         public Dictionary<IBattleshipController, int> GetScores()
         {
-            return controllers.ToDictionary(s => s.ibc, s => s.GetFieldInfo().score);
+            return controllers.ToDictionary(s => s.BattleshipController, s => s.GetFieldInfo().Score);
         }
 
         
@@ -328,8 +328,8 @@
         /// <returns>A list of the two opponents with their scores attached.</returns>
         /// <param name="playOut">If the amount of rounds specified is to be played out (ie.
         /// total score between the two opponents) or not (ie. first score to rounds)</param>
-        /// <param name="rnds">The amount of rounds to play.</param>
-        public void RunRounds(int rnds, bool playOut)
+        /// <param name="rounds">The amount of rounds to play.</param>
+        public void RunRounds(int rounds, bool playOut)
         {
             isRunning = true;
             int gamePlays = 0;
@@ -338,7 +338,7 @@
                 bc.NewMatch(Opponent(bc).ToString());
 
             //This loop continues until this competition is complete.
-            while (playOut ? !RoundsReached(rnds) : gamePlays++ < (rnds * 2 - 1) && isRunning)
+            while (playOut ? !RoundsReached(rounds) : gamePlays++ < (rounds * 2 - 1) && isRunning)
             {
                 NewRound();
                 RunRound();
@@ -348,8 +348,8 @@
                 }
             }
 
-            foreach (Controller bc in controllers)
-                bc.MatchOver();
+            foreach (Controller controller in controllers)
+                controller.MatchOver();
             if (MatchEndEvent != null)
                 MatchEndEvent();
             isRunning = false;
@@ -372,7 +372,7 @@
             {
                 return;
             }
-            compThread.Start();
+            competitionThread.Start();
         }
 
         
