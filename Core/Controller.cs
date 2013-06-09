@@ -19,6 +19,16 @@ namespace MBC.Core
     /// </summary>
     public class Controller
     {
+
+        /// <summary>
+        /// In a battleship competition the controller is associated with an agent
+        /// This Enum store all the possible agents a controller can be associated with
+        ///  None represents no player
+        ///  Red represents the first player
+        ///  Blue represents the second player
+        /// </summary>
+        public enum Players : int { None, Red, Blue }
+
         /// <summary>
         /// Number used in Point objects to signify a loss (timed out).
         /// </summary>

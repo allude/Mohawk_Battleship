@@ -52,8 +52,8 @@
             Configuration.Default.SetValue<bool>("mbc_playout", false);
         }
         private Controller[] controllers;     //Guaranteed to always be a 2-element array.
-        private Configuration config;            //Configuration used for this competition
-        private Field fieldInfo;              //Contains field information
+        private Configuration configuration;            //Configuration used for this competition
+        private Field field;              //Contains field information
         private List<RoundLog> roundList;
         private RoundLog roundLogger;               //The current RoundLog for the current round
 
@@ -95,42 +95,42 @@
         
         /// <summary>Constructs a new Competition object. A Configuration object is to be provided
         /// to set the behaviour of this Competition.</summary>
-        /// <param name="config">The Configuration to utilize. See SetConfigDefaults()</param>
-        /// <param name="battleshipController">The controllers to create a matchup with.</param>
-        public Competition(IBattleshipController[] battleshipController, Configuration config)
+        /// <param name="configuration">The Configuration to utilize. See SetConfigDefaults()</param>
+        /// <param name="battleshipControllers">The controllers to create a matchup with.</param>
+        public Competition(IBattleshipController[] battleshipControllers, Configuration configuration)
         {
-            init(battleshipController, config, config.GetValue<int>("mbc_random_seed"));
+            init(battleshipControllers, configuration, configuration.GetValue<int>("mbc_random_seed"));
         }
 
         
         /// <summary>Constructs a new Competition object. A Configuration object is to be provided
         /// to set the behaviour of this Competition, and a random seed number must be provided to
         /// set the internal random number generator.</summary>
-        /// <param name="config">The Configuration to utilize. See SetConfigDefaults()</param>
-        /// <param name="battleshipController">The controllers to create a matchup with.</param>
+        /// <param name="configuration">The Configuration to utilize. See SetConfigDefaults()</param>
+        /// <param name="battleshipControllers">The controllers to create a matchup with.</param>
         /// <param name="seedNumber">The random seed number to create a desired outcome.</param>
-        public Competition(IBattleshipController[] battleshipController, Configuration config, int seedNumber)
+        public Competition(IBattleshipController[] battleshipControllers, Configuration configuration, int seedNumber)
         {
-            init(battleshipController, config, seedNumber); 
+            init(battleshipControllers, configuration, seedNumber); 
         }
 
         
         /// <summary>Called only by the constructor, does initialization of this class. See the constructors
         /// Competition().</summary>
-        private void init(IBattleshipController[] battleshipController, Configuration conf, int seedNumber)
+        private void init(IBattleshipController[] battleshipControllers, Configuration configuration, int seedNumber)
         {
-            config = conf;
-            fieldInfo = new Field(battleshipController);
-            fieldInfo.FixedRandom = new Random(seedNumber);
-            fieldInfo.GameSize = new Size(config.GetValue<int>("mbc_field_width"), config.GetValue<int>("mbc_field_height"));
-            fieldInfo.ShipSizes = config.GetList<int>("mbc_field_ship_sizes");
-            fieldInfo.TimeoutLimit = new TimeSpan(0, 0, 0, 0, config.GetValue<int>("mbc_timeout"));
+            this.configuration = configuration;
+            field = new Field(battleshipControllers);
+            field.FixedRandom = new Random(seedNumber);
+            field.GameSize = new Size(configuration.GetValue<int>("mbc_field_width"), configuration.GetValue<int>("mbc_field_height"));
+            field.ShipSizes = configuration.GetList<int>("mbc_field_ship_sizes");
+            field.TimeoutLimit = new TimeSpan(0, 0, 0, 0, configuration.GetValue<int>("mbc_timeout"));
 
             roundList = new List<RoundLog>();
 
             controllers = new Controller[2];
-            controllers[0] = new Controller(battleshipController[0], fieldInfo, 0);
-            controllers[1] = new Controller(battleshipController[1], fieldInfo, 1);
+            controllers[0] = new Controller(battleshipControllers[0], field, 0);
+            controllers[1] = new Controller(battleshipControllers[1], field, 1);
 
             competitionThread = new Thread(RunCompetition);
         }
@@ -139,14 +139,18 @@
         /// <summary>A Getter method used to get the Field associated with this Competition.</summary>
         /// <returns>The battlefield associated with this competition</returns>
         /// <seealso cref="Field"/>
+        public Field BattleField { get { return field; } }
+        [Obsolete]
         public Field GetBattlefield()
         {
-            return fieldInfo;
+            return field;
         }
 
         
         /// <summary>Gets the rounds that are in progress or completed. Useful for invoking GetRoundLogAt().</summary>
         /// <returns>The number of rounds played, complete or incomplete</returns>
+        public int RoundCount { get { return roundList.Count; } }
+        [Obsolete]
         public int GetRoundCount()
         {
             return roundList.Count;
@@ -168,7 +172,7 @@
         /// <returns>A list of ships not placed on the board, defined to having a length specified by shipSizes</returns>
         private List<Ship> GenerateNewShips()
         {
-            return (from s in fieldInfo.ShipSizes
+            return (from s in field.ShipSizes
                     select new Ship(s)).ToList();
         }
 
@@ -217,7 +221,7 @@
                     if (controller.PlaceShips(GenerateNewShips()))
                         return GameResultPush(Opponent(controller), controller, RoundLog.RoundActivity.Reason_Timeout);
                     RoundLog.RoundActivity action = new RoundLog.RoundActivity(controller.ShipsReady() ? "Ready" : "Invalid", controller.FieldIndex, RoundLog.RoundAction.ShipsPlaced);
-                    action.fieldState = new Field(fieldInfo);
+                    action.fieldState = new Field(field);
                     roundLogger.PutAction(action);
                 } while (!controller.ShipsReady());
             return false;
@@ -241,7 +245,7 @@
             {
                 roundLogger.PutAction(new RoundLog.RoundActivity(shot.X + "," + shot.Y, turn.FieldIndex, RoundLog.RoundAction.ShotAndHit, turn.GetTimeTaken()));
 
-                bool sunk = shipHit.IsSunk(turn.GetFieldInfo().ShotsMade);
+                bool sunk = shipHit.IsSunk(turn.ControllerInformation.ShotsMade);
 
                 turn.ShotHit(shot, sunk);
                 if (sunk)
@@ -254,7 +258,7 @@
             }
 
             //Are there any ships left from the other opponent?
-            if (!Opponent(turn).IsAlive(turn.GetFieldInfo().ShotsMade))
+            if (!Opponent(turn).IsAlive(turn.ControllerInformation.ShotsMade))
                 return GameResultPush(turn, Opponent(turn), null);
             return false;
         }
@@ -275,7 +279,7 @@
                 roundLogger = new RoundLog();
                 roundList.Add(roundLogger);
 
-                turn = controllers[fieldInfo.FixedRandom.Next(2)];
+                turn = controllers[field.FixedRandom.Next(2)];
                 roundLogger.PutAction(new RoundLog.RoundActivity(null, turn.FieldIndex, RoundLog.RoundAction.RoundBegin));
             }
 
@@ -312,7 +316,7 @@
         /// <returns>True if an opponent has reached the number of rounds</returns>
         private bool RoundsReached(int rounds)
         {
-            return controllers[0].GetFieldInfo().Score >= rounds || controllers[1].GetFieldInfo().Score >= rounds;
+            return controllers[0].ControllerInformation.Score >= rounds || controllers[1].ControllerInformation.Score >= rounds;
         }
 
         
@@ -320,7 +324,7 @@
         /// <returns>A dictionary linking the scores to the opponents.</returns>
         public Dictionary<IBattleshipController, int> GetScores()
         {
-            return controllers.ToDictionary(s => s.BattleshipController, s => s.GetFieldInfo().Score);
+            return controllers.ToDictionary(s => s.BattleshipController, s => s.ControllerInformation.Score);
         }
 
         
@@ -360,8 +364,8 @@
         /// Bases the amount of rounds to play and how to play them in the configuration.</summary>
         public void RunCompetition()
         {
-            RunRounds(config.GetValue<int>("mbc_rounds"),
-                config.GetValue<bool>("mbc_playout"));
+            RunRounds(configuration.GetValue<int>("mbc_rounds"),
+                configuration.GetValue<bool>("mbc_playout"));
         }
 
         
